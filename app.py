@@ -19,7 +19,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 class Translator:
     def __init__(self):
         self.is_macos = platform.system() == "Darwin"
-        self.API_KEY = "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"
+        self.API_KEY = "____"
         self.MODEL = "deepseek/deepseek-r1:free"
     
     def translate(self, text):
