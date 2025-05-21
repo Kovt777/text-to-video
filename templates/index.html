@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Text-2-Video</title>
+    <style>
+        :root {
+            --neon-pink: #ff2a6d;
+            --neon-blue: #05d9e8;
+            --dark-bg: #0d0221;
+        }
+        body {
+            background: var(--dark-bg);
+            color: white;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid var(--neon-blue);
+            padding: 20px;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+        h1 {
+            color: var(--neon-pink);
+            text-align: center;
+            text-shadow: 0 0 5px var(--neon-pink);
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--neon-pink);
+            color: white;
+            min-height: 100px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: linear-gradient(to right, var(--neon-pink), var(--neon-blue));
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .styles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .style-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 8px;
+            border: 1px solid var(--neon-blue);
+            background: transparent;
+            color: white;
+            cursor: pointer;
+        }
+        .style-btn:hover {
+            background: rgba(5, 217, 232, 0.2);
+        }
+        video {
+            max-width: 100%;
+            margin-top: 20px;
+            display: none;
+        }
+        .status {
+            margin: 10px 0;
+            color: var(--neon-blue);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text-2-Video</h1>
+        
+        <textarea id="prompt" placeholder="Введите описание на русском..."></textarea>
+        
+        <div class="styles">
+            {% for style in styles %}
+                <button class="style-btn" onclick="addStyle('{{ style }}')">{{ style }}</button>
+            {% endfor %}
+        </div>
+        
+        <button onclick="generate()">Сгенерировать видео</button>
+        
+        <div class="status" id="status"></div>
+        
+        <video id="result" controls></video>
+    </div>
+
+    <script>
+        function addStyle(style) {
+            const prompt = document.getElementById('prompt');
+            if (prompt.value) {
+                prompt.value += ', ' + style;
+            } else {
+                prompt.value = style;
+            }
+        }
+        
+        async function generate() {
+            const prompt = document.getElementById('prompt').value;
+            if (!prompt) {
+                document.getElementById('status').textContent = 'Пожалуйста, введите описание';
+                return;
+            }
+            
+            const btn = event.target;
+            const status = document.getElementById('status');
+            const video = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = 'Генерация...';
+            status.textContent = 'Обработка запроса...';
+            video.style.display = 'none';
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        prompt: prompt,
+                        style: ''
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    video.src = data.video_url;
+                    video.style.display = 'block';
+                    status.textContent = 'Готово!';
+                } else {
+                    status.textContent = 'Ошибка: ' + data.message;
+                }
+            } catch (e) {
+                status.textContent = 'Ошибка соединения';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Сгенерировать видео';
+            }
+        }
+    </script>
+</body>
+</html>
