@@ -1,0 +1,11 @@
+# Query: 
+# ContextLines: 1
+
+flask==2.3.2
+torch==2.0.1
+diffusers==0.20.0
+transformers==4.30.2
+huggingface_hub==0.16.4
+requests==2.31.0
+opencv-python==4.7.0.72
+ffmpeg-python==0.2.0
